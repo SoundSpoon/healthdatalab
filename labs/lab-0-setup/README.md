@@ -146,113 +146,210 @@ Debe salir algo como:
 
 ## 7) Crear datos en la base de datos (SQL reproducible)
 
-Ahora crearemos una tabla simple `patient` y cargaremos 3 filas.
+Ahora crearemos una tabla simple `patient` y cargaremos 5 filas.
 
-### 7.1 Crear el archivo SQL
+7.1 Crear el archivo SQL
 
-En el repo, crea la carpeta `sql/` (si no existe) y el archivo:
+En el repositorio, crea la carpeta sql/ (si no existe) y el archivo:
 
-- `sql/001_init.sql`
+sql/001_init.sql
 
-Contenido:
 
-```sql
+Copia tal cual el siguiente contenido:
+
 CREATE TABLE IF NOT EXISTS patient (
   patient_id SERIAL PRIMARY KEY,
   sex TEXT CHECK (sex IN ('M','F','O')),
   birth_date DATE,
+  city TEXT,
+  has_chronic_condition BOOLEAN,
   created_at TIMESTAMP DEFAULT now()
 );
 
-INSERT INTO patient (sex, birth_date) VALUES
-('F', '1990-05-12'),
-('M', '1984-11-03'),
-('O', '2001-07-21');
-```
+INSERT INTO patient (sex, birth_date, city, has_chronic_condition) VALUES
+('F', '1990-05-12', 'Guatemala', true),
+('M', '1984-11-03', 'Antigua', false),
+('O', '2001-07-21', 'Quetzaltenango', true),
+('F', '1975-02-18', 'Guatemala', false),
+('M', '1998-09-30', 'Escuintla', false);
 
-### 7.2 Ejecutar el SQL en PostgreSQL (Windows PowerShell)
+> Esta tabla representa un ejemplo simplificado de pacientes: sexo, fecha de nacimiento, ciudad y si tienen una condición crónica.
 
-PowerShell NO soporta `< archivo.sql` como bash.
-Usa este comando:
 
-```powershell
-Get-Content .\sql\001_init.sql | docker compose exec -T db psql -U uvg_user -d health_data
-```
 
-✅ Debes ver algo como:
-
-- `CREATE TABLE`
-- `INSERT 0 3`
 
 ---
 
-## 8) Consultar los datos desde Jupyter
+7.2 Ejecutar el SQL en PostgreSQL (Windows PowerShell)
 
-En `connection_test.ipynb`, agrega y ejecuta una celda con:
+⚠️ Importante (Windows): PowerShell no soporta < archivo.sql como bash.
 
-```python
+Ejecuta este comando desde la carpeta del laboratorio:
+
+Get-Content .\sql\001_init.sql | docker compose exec -T db psql -U uvg_user -d health_data
+
+Si todo salió bien, deberías ver algo como:
+
+CREATE TABLE
+
+INSERT 0 5
+
+
+Esto confirma que los datos fueron creados correctamente.
+
+
+---
+
+8) Primera consulta (copiar y ejecutar)
+
+Ahora verificaremos que los datos se pueden consultar desde el entorno analítico.
+
+En connection_test.ipynb, agrega una celda y copia exactamente este código:
+
 df = pd.read_sql("""
-SELECT patient_id, sex, birth_date, created_at
+SELECT patient_id, sex, birth_date, city, has_chronic_condition, created_at
 FROM patient
 ORDER BY patient_id;
 """, engine)
+
 df
-```
 
-Luego ejecuta este KPI simple:
+✅ Deberías ver una tabla con 5 pacientes.
 
-```python
-pd.read_sql("""
-SELECT sex, COUNT(*) AS n
-FROM patient
-GROUP BY sex
-ORDER BY n DESC;
-""", engine)
-```
+Hasta aquí, todo es copia guiada.
+A partir de ahora, escribirás tus propias consultas, con ayuda.
 
-✅ Si ves resultados: cerraste el ciclo **DB → análisis**.
 
 ---
 
-## 9) Entrega (Pull Request) — se hace AL FINAL (cuando todos tengan setup)
+9) Consultas guiadas (escritas por ti)
 
-**Importante:** no crees grupos al inicio. Primero todos deben lograr el setup.
-Cuando ya lo lograste, el docente asignará los grupos.
+En esta sección NO copies consultas completas.
+Sigue las instrucciones y escribe el SQL dentro del notebook.
 
-### 9.1 Crear rama del laboratorio
+9.1 Contar pacientes por sexo
+
+Pregunta:
+
+> ¿Cuántos pacientes hay por sexo?
+
+
+
+Pistas:
+
+Usa COUNT(*)
+
+Agrupa por sex
+
+
+Estructura sugerida (completa lo que falta):
+
+query = """
+-- selecciona el sexo
+-- cuenta cuántos registros hay
+-- indica la tabla
+-- agrupa por sexo
+"""
+pd.read_sql(query, engine)
+
+Resultado esperado:
+
+Una tabla con columnas sex y count
+
+Una fila por cada sexo presente
+
+
+
+---
+
+9.2 Pacientes con condición crónica
+
+Pregunta:
+
+> ¿Cuántos pacientes tienen una condición crónica?
+
+
+
+Pistas:
+
+La columna es has_chronic_condition
+
+Filtra solo los que tengan true
+
+
+Escribe una consulta que:
+
+1. Cuente pacientes
+
+
+2. Donde has_chronic_condition = true
+
+
+
+(No necesitas agrupar).
+
+
+---
+
+9.3 Pacientes por ciudad (opcional, reto corto)
+
+Pregunta:
+
+> ¿Cuántos pacientes hay por ciudad?
+
+
+
+Pistas:
+
+Agrupa por city
+
+Ordena de mayor a menor
+
+
+Resultado esperado:
+
+Ciudades con el número de pacientes en cada una
+
+
+---
+
+## 11) Entrega (Pull Request) — se hace AL FINAL (cuando todos tengan setup)
+
+
+### 11.1 Crear rama del laboratorio
 
 (El nombre exacto lo dirá el docente; ejemplo:)
 
 ```powershell
 git checkout main
 git pull
-git checkout -b lab01/grupo-XX
+git checkout -b lab00-setup/grupo-XX
 ```
 
-### 9.2 Guardar cambios (commit)
+### 11.2 Guardar cambios (commit)
 
 ```powershell
 git status
 git add sql/001_init.sql connection_test.ipynb
-git commit -m "Lab01: setup reproducible + patient table + query"
+git commit -m "Lab00-setup: setup reproducible + patient table + query"
 ```
 
-### 9.3 Subir tu rama (push)
+### 11.3 Subir tu rama (push)
 
 ```powershell
-git push -u origin lab01/grupo-XX
+git push -u origin lab00-setup/grupo-XX
 ```
 
-### 9.4 Crear Pull Request (PR) en GitHub
+### 11.4 Crear Pull Request (PR) en GitHub
 
 En GitHub:
 
 - Abre el repo
 - Te aparecerá “Compare & pull request”
 - Base: `main`
-- Compare: `lab01/grupo-XX`
+- Compare: `lab00-setup/grupo-XX`
 
-**Título:** `Lab01 – Grupo XX`
+**Título:** `Lab00-setup – Grupo XX`
 **Descripción (pega esto):**
 
 - Docker compose levanta Postgres + Jupyter
