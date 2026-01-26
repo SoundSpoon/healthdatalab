@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS labevents (
   labitem_id INT REFERENCES d_labitems(labitem_id),
   charttime TIMESTAMP,
   value_num NUMERIC
+<<<<<<< HEAD
 );
 
 -- Patients
@@ -158,3 +159,6 @@ INSERT INTO labevents (hadm_id, labitem_id, charttime, value_num) VALUES
 -- hadm 10 (Sofía - Appendicitis)
 (10, 3, '2101-08-22 06:00', 13.0),
 (10, 2, '2101-08-22 06:00', 12.9);
+=======
+);
+>>>>>>> ec47bca5d59d671cb94e0d7d717d5c8b895a553f
